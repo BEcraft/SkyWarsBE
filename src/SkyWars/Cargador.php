@@ -106,7 +106,7 @@ class Cargador extends PluginBase
         }
 
         //Idioma para el mini-juego
-        $this->lenguaje = new BaseLang($idioma, $this->getFile() . "resources/", $idioma);//cambiar ^ de folder
+        $this->lenguaje = new BaseLang($idioma, $directorio, $idioma);//cambiar ^ de folder
 
         //Instanciar el gestor de mapas
         $this->mapasGestor = new GestorMapas($configuracion->get("mapas", array()));
