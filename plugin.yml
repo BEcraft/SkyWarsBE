@@ -1,0 +1,16 @@
+name: SkyWarsBE
+version: 1.0.0
+api: 3.0.0+12
+main: SkyWars\Cargador
+author: BEcraft Gameplay
+prefix: SkyWars
+load: POSTWORLD
+website: www.twitter.com/BEcraft_MCPE
+description: Minijuego para Pocketmine
+permissions:
+  skywars.partida:
+    default: operator
+    description: Permiso para crear partidas.
+  skywars.mapa:
+    default: operator
+    descripcion: Permiso para crear mapas.

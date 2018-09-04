@@ -1,0 +1,89 @@
+---
+##############################################
+# Lenguaje para el minijuego, por defecto:   #
+# - espanol                                  #
+# - ingles                                   #
+##############################################
+
+idioma: espanol
+
+##############################################
+# Nombre del mapa de espera.                 #
+##############################################
+
+lobby: WaitingLobby
+
+##############################################
+# Modo de juego al terminar una partida.     #
+# Supervivencia: 0                           #
+# Creativo: 1                                #
+# Aventura: 2                                #
+# Espectador: 3                              #
+##############################################
+
+juego: 0
+
+##############################################
+# ESTRUCTURA PARA LOS KITS:                  #
+# ========================================== #
+# nombre del kit:                            #
+#  id:                                       #
+#   meta:                                    #
+#   cantidad:                                #
+#   nombre del objeto:                       #
+#   encantamientos:                          #
+#    - id:nivel                              #
+#    - ...                                   #
+#  permiso del kit:                          #
+# ========================================== #
+# Nota:                                      #
+# nombre y encantamientos son opcionales.    #
+##############################################
+
+kits:
+  gratis:
+    268:
+      meta: 0
+      cantidad: 1
+      nombre: Espada Normal
+    270:
+      meta: 0
+      cantidad: 1
+      nombre: Pico Normal
+      encantamientos:
+        - "15:1"
+    271:
+      meta: 0
+      cantidad: 1
+      nombre: Acha Normal
+      encantamientos:
+        - "17:1"
+
+##############################################
+# Configura si los kits solo serán para      #
+# los operadores del servidor o no.          #
+# Valores:                                   #
+# 1 = solo los operadores.                   #
+# 0 = solo los que tengan cierto permiso.    #
+##############################################
+
+operador: 0
+
+##############################################
+# Carteles para las partidas.                #
+##############################################
+
+carteles: []
+
+##############################################
+# Mapas para las partidas.                   #
+##############################################
+
+mapas: []
+
+##############################################
+# Partidas.                                  #
+##############################################
+
+partidas: []
+...
