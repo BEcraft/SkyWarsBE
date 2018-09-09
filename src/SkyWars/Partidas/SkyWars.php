@@ -6,7 +6,7 @@ namespace SkyWars\Partidas;
 
 /** SkyWars */
 use SkyWars\Cargador;
-use SkyWars\Sesiones\Usuario;
+use SkyWars\Secciones\Usuario;
 use SkyWars\Eventos\{
     SalirEvento, UnirseEvento, GanarEvento
 };
@@ -188,9 +188,14 @@ abstract class SkyWars
      */
     public function enviarDatos(): array
     {
-        $datos = array("buttons" => array(), "tipo" => "voto");
+        $datos = array(
+            "type"    => "form",
+            "title"   => "Voting",
+            "buttons" => array(),
+            "content" => ""
+        );
 
-        if (!empty($this->mapasDisponibles)) {
+        if (empty($this->mapasDisponibles) === false) {
             foreach ($this->mapasDisponibles as $mapa => $votos) {
                 $datos["buttons"][] = array("text" => $mapa . " > " . $votos);
             }
@@ -326,9 +331,8 @@ abstract class SkyWars
      */
     public function enviarMensajes($mensaje, $datos = array()): void
     {
-        $mensaje = $this->conseguirInstancia()->conseguirLenguaje()->translateString($mensaje, $datos);
-
         foreach ($this->conseguirJugadoresTotales() as $usuario) {
+            $mensaje = $this->conseguirInstancia()->conseguirLenguaje()::traducir($usuario->conseguirUsuario()->getLocale(), $mensaje, $datos);
             $usuario->conseguirUsuario()->sendMessage($mensaje);
             $usuario->conseguirUsuario()->getLevel()->broadcastLevelEvent($usuario->conseguirUsuario(), 1030);
         }
@@ -342,9 +346,8 @@ abstract class SkyWars
      */
     public function enviarTitulos($mensaje, $datos = array()): void
     {
-        $mensaje = $this->conseguirInstancia()->conseguirLenguaje()->translateString($mensaje, $datos);
-
         foreach ($this->conseguirJugadoresTotales() as $usuario) {
+            $mensaje = $this->conseguirInstancia()->conseguirLenguaje()::traducir($usuario->conseguirUsuario()->getLocale(), $mensaje, $datos);
             $usuario->conseguirUsuario()->addTitle("§eSkyWars", $mensaje, 10, 10, 10);
             $usuario->conseguirUsuario()->getLevel()->broadcastLevelEvent($usuario->conseguirUsuario(), 1009);
         }
@@ -442,8 +445,8 @@ abstract class SkyWars
     {
         foreach ($usuarios as $ganador) {
 
-            $ganador->conseguirUsuario()->sendMessage($this->conseguirInstancia()->conseguirLenguaje()->translateString("partida.ganar"));
-            $ganador->conseguirUsuario()->addTitle($this->conseguirInstancia()->conseguirLenguaje()->translateString("partida.ganar.titulo"), "§7§l#1", 15, 20 * 5, 15);
+            $ganador->conseguirUsuario()->sendMessage($this->conseguirInstancia()->conseguirLenguaje()::traducir($ganador->conseguirUsuario()->getLocale(), "partida.ganar"));
+            $ganador->conseguirUsuario()->addTitle($this->conseguirInstancia()->conseguirLenguaje()::traducir($ganador->conseguirUsuario()->getLocale(), "partida.ganar.titulo"), "§7§l#1", 15, 20 * 5, 15);
             $ganador->agregarEfecto();
 
             for ($i = 0; $i < 5; ++$i) {

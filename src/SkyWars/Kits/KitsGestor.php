@@ -97,7 +97,13 @@ class KitsGestor
      */
     public function enviarDatos(): array
     {
-        $botones = array("tipo" => "kits", "buttons" => array());
+        $botones = array(
+            "type"    => "form",
+            "title"   => "Kits",
+            "content" => "",
+            "buttons" => array()
+        );
+
         foreach (array_keys($this->conseguirKits()) as $nombre) {
             $botones["buttons"][] = array("text" => $nombre);
         }

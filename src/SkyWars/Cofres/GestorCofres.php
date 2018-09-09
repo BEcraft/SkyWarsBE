@@ -84,7 +84,7 @@ class GestorCofres
 
                     $cantidad = $objeto->getCount();
 
-                    if (($objeto instanceof ItemBlock and $objeto->getCount() >= 5) or (($objeto instanceof Food or $objeto instanceof ProjectileItem) and $objeto->getCount() > 1)) {
+                    if (($objeto instanceof ItemBlock and $objeto->getCount() >= 5) or (($objeto instanceof Food or $objeto instanceof ProjectileItem) and $objeto->getCount() > 2)) {
                         $objeto->setCount(mt_rand(0, 1) === 1 ? intval(round($objeto->getCount() / 2)) : $objeto->getCount()); //no se si sea la mejor opción...
                     }
 
@@ -117,10 +117,10 @@ class GestorCofres
 
             case ($numero > 80 and $numero < 95):
                 return "tirar";
-            
+
             default:
                 return "otros";
-                
+
         }
     }
 

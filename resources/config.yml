@@ -1,11 +1,15 @@
 ---
 ##############################################
-# Lenguaje para el minijuego, por defecto:   #
-# - espanol                                  #
-# - ingles                                   #
+# Idiomas disponibles                        #
 ##############################################
 
-idioma: espanol
+idiomas:
+  es: "espanol"
+  en: "english"
+  it: "italiano"
+  pt: "portugues"
+
+
 
 ##############################################
 # Nombre del mapa de espera.                 #

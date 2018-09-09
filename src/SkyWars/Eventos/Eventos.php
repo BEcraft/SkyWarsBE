@@ -8,7 +8,8 @@ namespace SkyWars\Eventos;
 use SkyWars\{
     Cargador, Cartel
 };
-use SkyWars\Sesiones\Usuario;
+use SkyWars\Ventana\Ventana;
+use SkyWars\Secciones\Usuario;
 
 /** PocketMine */
 use pocketmine\Player;
@@ -18,10 +19,6 @@ use pocketmine\block\Sign as SignC;
 use pocketmine\event\{
     Listener, Cancellable
 };
-use pocketmine\network\mcpe\protocol\{
-    ModalFormRequestPacket, ModalFormResponsePacket
-};
-use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\block\{
     BlockBreakEvent, BlockPlaceEvent, SignChangeEvent
 };
@@ -44,60 +41,6 @@ use pocketmine\event\player\{
 
 class Eventos implements Listener
 {
-
-    /** Identificadores para los paquetes */
-    private const VOTO = 74324454;
-    private const KITS = 98242622;
-
-    public function recivirPaquete(DataPacketReceiveEvent $evento): bool
-    {
-        $paquete = $evento->getPacket();
-        if ($paquete instanceof ModalFormResponsePacket) {
-
-            if ($paquete->formId !== self::KITS and $paquete->formId !== self::VOTO) {
-                return false;
-            }
-
-            $datos = json_decode($evento->getPacket()->formData, true);
-            if (isset($datos)) {
-                $this->agregarAccion($evento->getPlayer(), $paquete->formId, $datos);
-            }
-
-        }
-
-        return true;
-    }
-
-    public function agregarAccion(Player $jugador, int $identificador, int $boton): bool
-    {
-        $jugando = $this->conseguirInstancia()->conseguirGestorDeSecciones()->estaJugando($jugador->getName());
-        if ($jugando === null) {
-            return false;
-        }
-
-        if ($jugando->conseguirPartida()->conseguirEstado() > 1) {
-            return false;
-        }
-
-        if ($identificador === self::KITS) {
-            $kit = $this->conseguirInstancia()->conseguirGestorDeKits()->conseguirNombre($boton);
-            if ($this->conseguirInstancia()->conseguirGestorDeKits()->tienePermiso($jugador, $kit)) {
-                $jugando->asignarKit($kit);
-                $jugador->sendMessage($this->conseguirInstancia()->conseguirLenguaje()->translateString("paquete.kit.correcto", array($kit)));
-            }
-        }
-
-        if ($identificador === self::VOTO) {
-            $mapa = $jugando->conseguirPartida()->conseguirNombre($boton);
-            if ($mapa !== "") {
-                $jugando->conseguirPartida()->aumentarVotos($mapa);
-                $jugando->asignarVoto($mapa);
-                $jugador->sendMessage($this->conseguirInstancia()->conseguirLenguaje()->translateString("paquete.votar.correcto", array($mapa)));
-            }
-        }
-
-        return true;
-    }
 
     public function ejecutarEvento($evento, bool $cancelar = false, bool $sacar = false, bool $espectador = false): ?Usuario
     {
@@ -277,44 +220,11 @@ class Eventos implements Listener
                 $jugando->terminar();
             } else {
                 $evento->setCancelled();
-                $jugador->sendMessage($this->conseguirInstancia()->conseguirLenguaje()->translateString("evento.confirmar"));
+                $jugador->sendMessage($this->conseguirInstancia()->conseguirLenguaje()::traducir($jugador->getLocale(), "evento.confirmar"));
             }
         }
 
         return true;
-    }
-
-    public function agregarPaquete(Player $jugador, array $opciones): void
-    {
-        $datos = array("type" => "form", "content" => "", "buttons" => array());
-
-        if (isset($opciones["buttons"])) {
-            $datos["buttons"] = $opciones["buttons"];
-        }
-
-        $paquete = new ModalFormRequestPacket();
-        if (isset($opciones["tipo"])) {
-            switch ((string)$opciones["tipo"]) {
-                case "kits":
-                    $datos["title"] = "Selecciona un kit.";
-                    $paquete->formId = self::KITS;
-                    break;
-                case "voto":
-                    $datos["title"] = "Selecciona un mapa.";
-                    $paquete->formId = self::VOTO;
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        if (isset($opciones["content"])) {
-            $datos["content"] = $opciones["content"];
-        }
-
-        $paquete->formData = json_encode($datos);
-        $jugador->dataPacket($paquete);
     }
 
     public function romperBloque(BlockBreakEvent $evento): bool
@@ -460,13 +370,63 @@ class Eventos implements Listener
 
                 if ($id === 133) {
                     if ($jugando->conseguirPartida()->tieneMapa() === false and $jugando->haVotado() === false) {
-                        $this->agregarPaquete($jugador, $jugando->conseguirPartida()->enviarDatos());
+                        $accion = function($player, $data)
+                        {
+
+                            if ($data === null) {
+                                return;
+                            }
+
+                            $jugando = Cargador::$instancia->conseguirGestorDeSecciones()->estaJugando($player->getName());
+
+                            if ($jugando !== null) {
+
+                                if ($jugando->haVotado() === true) {
+                                    return;
+                                }
+
+                                $mapa = $jugando->conseguirPartida()->conseguirNombre($data);
+
+                                if ($mapa === "") {
+                                    return;
+                                }
+
+                                $jugando->asignarVoto($mapa);
+                                $jugando->conseguirPartida()->aumentarVotos($mapa);
+                                $player->sendMessage($this->conseguirInstancia()->conseguirLenguaje()::traducir($player->getLocale(), "paquete.votar.correcto", array($mapa)));
+
+                            }
+
+                        };
+                        $jugador->sendForm(new Ventana($jugando->conseguirPartida()->enviarDatos(), $accion));
                     }
                 }
 
                 if ($id === 120) {
                     if ($jugando->conseguirPartida()->conseguirEstado() < 2) {
-                        $this->agregarPaquete($jugador, $this->conseguirInstancia()->conseguirGestorDeKits()->enviarDatos());
+
+                        $llamada = function($player, $data) {
+
+                            if ($data === null) {
+                                return;
+                            }
+
+                            $jugando = Cargador::$instancia->conseguirGestorDeSecciones()->estaJugando($player->getName());
+
+                            if ($jugando !== null) {
+
+                                $kit = Cargador::$instancia->conseguirGestorDeKits()->conseguirNombre($data);
+
+                                if (Cargador::$instancia->conseguirGestorDeKits()->tienePermiso($player, $kit) === true) {
+                                    $jugando->asignarKit($kit);
+                                    $player->sendMessage($this->conseguirInstancia()->conseguirLenguaje()::traducir($player->getLocale(), "paquete.kit.correcto", array($kit)));
+                                }
+
+                            }
+                        };
+
+                        $jugador->sendForm(new Ventana($this->conseguirInstancia()->conseguirGestorDeKits()->enviarDatos(), $llamada));
+                       // $this->agregarPaquete($jugador, $this->conseguirInstancia()->conseguirGestorDeKits()->enviarDatos());
                     }
                 }
 
@@ -487,6 +447,7 @@ class Eventos implements Listener
                 } else {
                     $creando->agregarMaximo($posicion);
                 }
+
             }
         }
 

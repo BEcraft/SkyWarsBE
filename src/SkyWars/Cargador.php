@@ -12,7 +12,8 @@ use SkyWars\Cofres\GestorCofres;
 use SkyWars\Partidas\{
     Solo, Duo
 };
-use SkyWars\Sesiones\GestorSeccion;
+use SkyWars\Secciones\GestorSeccion;
+use SkyWars\Lenguaje\Lenguaje;
 use SkyWars\Tiempo\{
     Carteles, Partidas
 };
@@ -28,10 +29,9 @@ class Cargador extends PluginBase
 
     /** Nombre del directorio para los mapas */
     const MAPAS = "Mapas/";
-
     /**
      * Lenguaje para el minijuego.
-     * @var BaseLang
+     * @var Lenguaje
      */
     public $lenguaje;
 
@@ -69,6 +69,7 @@ class Cargador extends PluginBase
      * Gestor para los mapas.
      * @var GestorMapas
      */
+
     public $mapasGestor;
 
     /**
@@ -87,26 +88,37 @@ class Cargador extends PluginBase
         @mkdir($directorio . self::MAPAS);
 
         //guarda algun archivo que no exista
-        $archivos = array("config.yml", "espanol.ini", "ingles.ini", "portugues.ini", "italiano.ini", "Cofres.json");
-        foreach ($archivos as $archivo) {
-            if (!file_exists($directorio . $archivo)) {
-                $this->saveResource($archivo);
-            }
+        if (file_exists($directorio . "config.yml") === false) {
+            $this->saveResource("config.yml");
+        }
+
+        if (file_exists($directorio . "Cofres.json") === false) {
+            $this->saveResource("Cofres.json");
         }
 
         //configuracion
         $configuracion = $this->getConfig();
 
-        //Verificación del idioma
-        $idioma = $configuracion->get("idioma", "espanol");
-        if (($datos = $this->getResource($idioma . ".ini")) === null) {
-            $idioma = "espanol";
-        } else {
-            fclose($datos);
+        //conseguir la lista de idiomas
+        $lenguajes = $configuracion->get("idiomas", array());
+
+        //verificar si el lenguaje español existe
+        if (isset($lenguajes["es"]) === false) {
+            if (file_exists($directorio . "espanol.ini") === false) {
+                $this->saveResource("espanol.ini");
+            }
+            $lenguajes["es"] = "espanol";
         }
 
-        //Idioma para el mini-juego
-        $this->lenguaje = new BaseLang($idioma, $directorio, $idioma);//cambiar ^ de folder
+        //verificar ai algún lenguaje no existe
+        foreach ($lenguajes as $codigo => $archivo) {
+            if (isset($archivo) === false and is_file($directorio . $archivo) === false) {
+                unset($lenguajes[$codigo]);
+            }
+        }
+
+        //idiomas
+        $this->lenguaje = new Lenguaje($lenguajes, $directorio);
 
         //Instanciar el gestor de mapas
         $this->mapasGestor = new GestorMapas($configuracion->get("mapas", array()));
@@ -148,9 +160,9 @@ class Cargador extends PluginBase
 
     /**
      * Conseguir lenguaje
-     * @return BaseLang
+     * @return Lenguaje
      */
-    public function conseguirLenguaje(): BaseLang
+    public function conseguirLenguaje(): Lenguaje
     {
         return $this->lenguaje;
     }

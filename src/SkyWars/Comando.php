@@ -6,7 +6,7 @@ namespace SkyWars;
 
 /** SkyWars */
 use SkyWars\Partidas\SkyWars;
-use SkyWars\Sesiones\Creador;
+use SkyWars\Secciones\Creador;
 
 /** PocketMine */
 use pocketmine\Player;
@@ -66,52 +66,52 @@ class Comando extends PluginCommand
                             $mundo = $sender->getLevel()->getFolderName();
 
                             if ($mundo === $this->cargador->getServer()->getDefaultLevel()->getFolderName()) {
-                                $sender->sendMessage($idiomas->translateString("creando.mapa.default"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.mapa.default"));
                                 break;
                             }
 
                             if ($mundo === $this->cargador->conseguirLobby()->getFolderName()) {
-                                $sender->sendMessage($idiomas->translateString("creando.mapa.lobby"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.mapa.lobby"));
                                 break;
                             }
 
                             if ($this->cargador->conseguirGestorDeMapas()->existeMapa($mundo)) {
-                                $sender->sendMessage($idiomas->translateString("creando.mapa.existe"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.mapa.existe"));
                                 break;
                             }
 
                             foreach ($this->cargador->conseguirGestorDeSecciones()->creandoMapa as $nombre => $clase) {
                                 if ($clase->opciones["mundo"] === $mundo) {
-                                    $sender->sendMessage($idiomas->translateString("creando.mapa.existe"));
+                                    $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.mapa.existe"));
                                     break 2;
                                 }
                             }
 
                             //sabias que cuando te bañas... te mojas el cuerpo?
                             $creando->opciones["mundo"] = $mundo;
-                            $sender->sendMessage($idiomas->translateString("creando.mapa.correcto"));
+                            $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.mapa.correcto"));
                             break;
 
                         case "maximo":
                         case "maximum":
                         case "massimo":
                             if (isset($param[1]) === false) {
-                                $sender->sendMessage($idiomas->translateString("creando.maximo.numerico"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.maximo.numerico"));
                                 break;
                             }
 
                             if ($creando->opciones["maximo"] !== null) {
-                                $sender->sendMessage($idiomas->translateString("creando.maximo.existe"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.maximo.existe"));
                                 break;
                             }
 
                             if ($param[1] < 2) {
-                                $sender->sendMessage($idiomas->translateString("creando.maximo.menor"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.maximo.menor"));
                                 return false;
                             }
 
                             $creando->opciones["maximo"] = intval($param[1]);
-                            $sender->sendMessage($idiomas->translateString("creando.maximo.correcto", array($param[1])));
+                            $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.maximo.correcto", array($param[1])));
                             break;
 
                         case "agregar":
@@ -119,17 +119,17 @@ class Comando extends PluginCommand
                         case "adicionar":
                         case "aggiungere":
                             if ($creando->opciones["maximo"] === null or $creando->opciones["mundo"] === null) {
-                                $sender->sendMessage($idiomas->translateString("creando.agregar.error"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.agregar.error"));
                                 break;
                             }
 
                             if (count($creando->opciones["posiciones"]) === $creando->opciones["maximo"]) {
-                                $sender->sendMessage($idiomas->translateString("creando.agregar.limite"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.agregar.limite"));
                                 break;
                             }
 
                             $creando->opciones["posiciones"][] = $sender->x . ":" . $sender->y . ":" . $sender->z;
-                            $sender->sendMessage($idiomas->translateString("creando.agregar.correcto"));
+                            $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.agregar.correcto"));
                             break;
 
                         case "remover":
@@ -138,9 +138,9 @@ class Comando extends PluginCommand
                         case "rimuovere";
                             if (!empty($creando->opciones["posiciones"])) {
                                 unset($creando->opciones["posiciones"][count($creando->opciones["posiciones"]) - 1]);
-                                $sender->sendMessage($idiomas->translateString("creando.borrar.correcto"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.borrar.correcto"));
                             } else {
-                                $sender->sendMessage($idiomas->translateString("creando.borrar.vacio"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.borrar.vacio"));
                             }
                             break;
 
@@ -149,22 +149,31 @@ class Comando extends PluginCommand
                         case "rtudo":
                         case "rtutto";
                             $creando->opciones = array("mundo" => null, "maximo" => null, "posiciones" => array(), "medianos" => array(), "maximos" => array());
-                            $sender->sendMessage($idiomas->translateString("creando.todo.correcto"));
+                            $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.todo.correcto"));
                             break;
 
                         case "progreso":
                         case "progress":
                         case "progresso":
-                            $sender->sendMessage($idiomas->translateString("creando.progreso.correcto", array(($creando->opciones["mundo"] ?? "-"), ($creando->opciones["maximo"] ?? 0), count($creando->opciones["posiciones"]), count($creando->opciones["medianos"]), count($creando->opciones["maximos"]))));
+                            $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.progreso.correcto", array(($creando->opciones["mundo"] ?? "-"), ($creando->opciones["maximo"] ?? 0), count($creando->opciones["posiciones"]), count($creando->opciones["medianos"]), count($creando->opciones["maximos"]))));
                             break;
 
                         case "guardar":
                         case "save":
                         case "salvare":
-                            if ($creando->terminar()) {
-                                $sender->sendMessage($idiomas->translateString("creando.guardar.correcto"));
+                            if ($creando->terminar() === true) {
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.guardar.correcto"));
                             } else {
-                                $sender->sendMessage($idiomas->translateString("creando.guardar.error"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.guardar.error"));
+                            }
+                            break;
+
+                        case "salir":
+                        case "leave":
+                        case "sair":
+                        case "uscire":
+                            if ($creando->terminar(true)) {
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "creando.guardar.correcto"));
                             }
                             break;
 
@@ -178,7 +187,7 @@ class Comando extends PluginCommand
                             if ($sender->hasPermission("skywars.partida")) {
 
                                 if (count($param) !== 4) {
-                                    $sender->sendMessage($idiomas->translateString("normal.partida.argumentos"));
+                                    $sender->sendMessage($idiomas::traducir($sender->getLocale(), "normal.partida.argumentos"));
                                     break;
                                 }
 
@@ -189,12 +198,12 @@ class Comando extends PluginCommand
                                 $duos = boolval(array_shift($param));
 
                                 if ($maximo < 2 or $minimo < 2) {
-                                    $sender->sendMessage($idiomas->translateString("normal.partida.menor"));
+                                    $sender->sendMessage($idiomas::traducir($sender->getLocale(), "normal.partida.menor"));
                                     break;
                                 }
 
                                 if ($maximo < $minimo) {
-                                    $sender->sendMessage($idiomas->translateString("normal.partida.mayor"));
+                                    $sender->sendMessage($idiomas::traducir($sender->getLocale(), "normal.partida.mayor"));
                                     break;
                                 }
 
@@ -216,7 +225,7 @@ class Comando extends PluginCommand
                                 $configuracion->save();
 
                                 // Baby shark doo doo do da doo doo...
-                                $sender->sendMessage($idiomas->translateString("normal.partida.correcto"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "normal.partida.correcto"));
                             }
                             break;
 
@@ -227,7 +236,7 @@ class Comando extends PluginCommand
                             if ($sender->hasPermission("skywars.mapa")) {
                                 //agregar por Gestor de Secciones
                                 $this->cargador->conseguirGestorDeSecciones()->creandoMapa[$sender->getName()] = new Creador($sender);
-                                $sender->sendMessage($idiomas->translateString("normal.crear.correcto"));
+                                $sender->sendMessage($idiomas::traducir($sender->getLocale(), "normal.crear.correcto"));
                             }
                             break;
 
@@ -239,7 +248,7 @@ class Comando extends PluginCommand
                                     if ($partida->tieneMapa() and $partida->conseguirMapa() !== null) {
                                         //ser o no ser...
                                         if ($sender->getLevel()->getFolderName() === $partida->conseguirMapa()->getFolderName()) {
-                                            $sender->sendMessage($idiomas->translateString("normal.mapa.existe"));
+                                            $sender->sendMessage($idiomas::traducir($sender->getLocale(), "normal.mapa.existe"));
                                             break 2;
                                         }
                                     }
@@ -250,10 +259,10 @@ class Comando extends PluginCommand
 
                                 if ($this->cargador->getConfig()->get("lobby", "") === $mapa) {
                                     //felicidades :D
-                                    $sender->sendMessage($idiomas->translateString("normal.mapa.correcto"));
+                                    $sender->sendMessage($idiomas::traducir($sender->getLocale(), "normal.mapa.correcto"));
                                 } else {
                                     //... :(
-                                    $sender->sendMessage($idiomas->translateString("normal.mapa.error"));
+                                    $sender->sendMessage($idiomas::traducir($sender->getLocale(), "normal.mapa.error"));
                                 }
                             }
                             break;
