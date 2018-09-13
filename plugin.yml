@@ -1,6 +1,6 @@
 name: SkyWarsBE
 version: 1.0.0
-api: 3.0.0+12
+api: [3.0.0, 4.0.0]
 main: SkyWars\Cargador
 author: BEcraft Gameplay
 prefix: SkyWars
