@@ -3,7 +3,7 @@
 namespace SkyWars\Lenguaje;
 
 /** PocketMine */
-use pocketmine\lang\Language;
+use pocketmine\lang\BaseLang;
 
 class Lenguaje
 {
@@ -19,7 +19,7 @@ class Lenguaje
     public function __construct(array $directorios, $directorio)
     {
         foreach ($directorios as $lenguaje => $archivo) {
-            self::$lenguajes[$lenguaje] = new Language($archivo, $directorio, $archivo);
+            self::$lenguajes[$lenguaje] = new BaseLang($archivo, $directorio, $archivo);
         }
     }
 
